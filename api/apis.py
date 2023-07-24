@@ -45,11 +45,19 @@ class TestApi(ListCreateAPIView):
 class StageApi(ListCreateAPIView):
     '''TestApiで取得出来そう'''
     # 対象とするモデルのオブジェクトを定義
-    queryset = StageModel.objects.filter(fes_id=1)
+    queryset = StageModel.objects.filter()
     # APIがデータを返すためのデータ変換ロジックを定義
     serializer_class = StageModelSerializer
     # 認証
     permission_classes = []
+
+    def get(self, request, *args, **kwargs):
+        # リクエストからGETパラメータを取得
+        param_value = request.query_params.get('id')
+        # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
+        queryset = StageModel.objects.filter(fes_id=param_value)
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
 
 # Create your views here.
 class HelloView(APIView):

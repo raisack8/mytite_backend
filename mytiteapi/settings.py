@@ -26,6 +26,7 @@ SECRET_KEY = 'django-insecure-rk=o(4)u)3v0qf)k*$mbtui&%6hgwclk(-e&=wdrp@^)&xs)@c
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'https://mytite-frontend-cnszbfeguq-uc.a.run.app',
     'mytite-backend-cnszbfeguq-uc.a.run.app',
     '*'
 ]

@@ -27,6 +27,8 @@ class StageModel(models.Model):
   name = models.TextField()
   place = models.TextField()
   color = models.TextField(default="#C0C0C0")
+  stage_image_path1 = models.TextField(null=True)
+  stage_image_path2 = models.TextField(null=True)
 
 class CategoryModel(models.Model):
   fes_id = models.ForeignKey(FesModel, on_delete=models.CASCADE)
@@ -43,7 +45,7 @@ class SectionModel(models.Model):
   allotted_time = models.IntegerField()
   live_category = models.ForeignKey(CategoryModel, on_delete=models.CASCADE) # 別途DB?
   artist_name = models.TextField()
-  apparence_flg = models.BooleanField(null=True)
+  apparence_flg = models.BooleanField(default=True)
   change_time_flg = models.BooleanField(null=True)
   other1 = models.TextField(null=True)
   other2 = models.TextField(null=True)
