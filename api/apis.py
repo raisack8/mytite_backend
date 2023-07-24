@@ -26,9 +26,8 @@ class TestSet(viewsets.ModelViewSet):
 
 
 class TestApi(ListCreateAPIView):
-    '''TestApiで取得出来そう'''
     # 対象とするモデルのオブジェクトを定義
-    queryset = SectionModel.objects.filter(fes_id=1)
+    queryset = SectionModel.objects.filter()
     # APIがデータを返すためのデータ変換ロジックを定義
     serializer_class = SectionModelSerializer
     # 認証

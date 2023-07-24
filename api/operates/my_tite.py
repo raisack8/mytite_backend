@@ -7,10 +7,11 @@ class MyTiteGenerator:
     @classmethod
     def get(self, obj ,request):
         param_value = request.query_params.get('id')
-        serializer = obj.serializer_class(obj.get_queryset(), many=True)
-        # print(param_value)
+        # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
+        queryset = SectionModel.objects.filter(fes_id=param_value)
+        serializer = obj.serializer_class(queryset, many=True)
         return serializer.data
-    
+
     @classmethod
     def post(self, obj, request):
         # POSTリクエストで送信されたデータを取得する
@@ -49,7 +50,7 @@ class MyTiteGenerator:
             time_list.append(query.start_time)
             # 選択してきたSectionをリストに格納
             res_list.append(obj)
-        
+
         # 各Sectionのstart_timeを時間順にソート
         time_list.sort()
 
@@ -84,7 +85,7 @@ class MyTiteGenerator:
                   continue_flag = False
                   # ループ終了
                   break
-              
+
               if target_time <= end_time:
                   # 5分繰り上げて再ループ
                   target_time = target_time + datetime.timedelta(minutes=5)
@@ -109,6 +110,6 @@ class MyTiteGenerator:
             'myTiteSections': return_list,
             'errorMsg': error_msg
         }
-            
+
         return {"message": result}
 
