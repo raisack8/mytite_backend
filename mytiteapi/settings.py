@@ -129,8 +129,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# API通信を許可するホストURL
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000', # ここに追加
+    'http://localhost:3000',
+    'https://mytite-frontend-cnszbfeguq-uc.a.run.app',
 ]
 
 # 管理者画面のURLを設定
