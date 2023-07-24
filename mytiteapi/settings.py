@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-rk=o(4)u)3v0qf)k*$mbtui&%6hgwclk(-e&=wdrp@^)&xs)@c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'mytite-backend-cnszbfeguq-uc.a.run.app',
+    '*'
+]
 
 
 # Application definition
