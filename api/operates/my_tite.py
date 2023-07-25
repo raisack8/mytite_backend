@@ -41,7 +41,7 @@ class MyTiteGenerator:
               'artist_name':query.artist_name,
               # 'apparence_flg':query.apparence_flg,
               # 'change_time_flg':query.change_time_flg,
-              # 'other1':query.other1,
+              'other1':query.other1,
               # 'other2':query.other2,
               # 'official_url':query.official_url,
               # 'twitter_id':query.twitter_id,
