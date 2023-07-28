@@ -92,12 +92,16 @@ import os
 if os.getenv('GAE_APPLICATION', None):
   # GAE本番環境
   DATABASES = {
-    'default': {
-      'ENGINE': 'django.db.backends.mysql',
-      'HOST': '/cloudsql/my-tite-project:us-central1:my-tite-db',
-      'USER': 'root',
-      'PASSWORD': 'Yama070301',
-      'NAME': 'my_tite_db',
+    # 'default': {
+    #   'ENGINE': 'django.db.backends.mysql',
+    #   'HOST': '/cloudsql/my-tite-project:us-central1:my-tite-db',
+    #   'USER': 'root',
+    #   'PASSWORD': 'Yama070301',
+    #   'NAME': 'my_tite_db',
+    # }
+        'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
   }
 else:
