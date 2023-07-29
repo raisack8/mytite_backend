@@ -18,6 +18,10 @@ class MyTiteGenerator:
         data = request.data
         # POSTで送られてきたidに紐づくSectionを返す。
         queryset = SectionModel.objects.filter(id__in=data["id"])
+        stage_model = StageModel.objects.filter(fes_id_id=request.data["stage_id"])
+        stage_dict = {}
+        for stage in stage_model:
+          stage_dict[stage.id] = stage.stage_image_path1
 
         if len(queryset) == 0:
           result = {
@@ -46,6 +50,7 @@ class MyTiteGenerator:
               # 'official_url':query.official_url,
               # 'twitter_id':query.twitter_id,
               # 'insta_id':query.insta_id,
+              'org_stage_id':query.stage.id
               }
             time_list.append(query.start_time)
             # 選択してきたSectionをリストに格納
@@ -71,6 +76,7 @@ class MyTiteGenerator:
                       copy_sec = res
                       res_list.pop(i)
                       copy_sec['stage'] = stage_id
+                      copy_sec['stage_img_url'] = stage_dict[res['org_stage_id']]
                       return_list.append(copy_sec)
 
                       # 一致したtimeをtime_listから取り除く
