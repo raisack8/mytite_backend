@@ -7,12 +7,7 @@ import datetime
 class FesModel(models.Model):
   name = models.TextField()
   year = models.DateField()
-  event_data1 = models.DateField()
-  event_data2 = models.DateField(null=True)
-  event_data3 = models.DateField(null=True)
-  event_data4 = models.DateField(null=True)
-  event_data5 = models.DateField(null=True)
-  event_data6 = models.DateField(null=True)
+  event_date = models.DateField()
   place = models.TextField(null=True)
   official_url = models.TextField(null=True)
   twitter_id =  models.TextField(null=True)
@@ -20,7 +15,9 @@ class FesModel(models.Model):
   image_url1 =  models.TextField(null=True)
   image_url2 =  models.TextField(null=True)
   image_url3 =  models.TextField(null=True)
-
+  other1 =  models.TextField(null=True)
+  other2 =  models.TextField(null=True)
+  
 class StageModel(models.Model):
   fes_id = models.ForeignKey(FesModel, on_delete=models.CASCADE)
   stage_id = models.IntegerField()
@@ -73,3 +70,24 @@ class UserModel(models.Model):
   my_tite_list = models.TextField(null=True) # [1,2,5,6]のように配列で格納したい　配列→文字列変換
   follow_list = models.TextField(null=True) # [1,2,5,6]のように配列で格納したい　配列→文字列変換
   follower_list = models.TextField(null=True) # [1,2,5,6]のように配列で格納したい　配列→文字列変換
+
+class MySectionModel(models.Model):
+  create_date = models.DateField(default=datetime.datetime.now)
+  '''fes_idが有れば日付を特定できる'''
+  # date = models.DateField()
+  start_time = models.DateTimeField()
+  allotted_time = models.IntegerField()
+  title = models.TextField()
+  other1 = models.TextField(null=True)
+  other2 = models.TextField(null=True)
+  fes_id = models.ForeignKey(FesModel, on_delete=models.CASCADE) 
+  user_id = models.ForeignKey(UserModel, on_delete=models.CASCADE) # 別途DB?
+
+class MyTiteModel(models.Model):
+  create_date = models.DateField(default=datetime.datetime.now)
+  section_list = models.TextField(null=True)
+  my_section_list = models.TextField(null=True)
+  user_id = models.ForeignKey(UserModel, on_delete=models.CASCADE) # 別途DB?
+  slot_num = models.IntegerField()
+  title = models.TextField(null=True)
+  explain = models.TextField(null=True)

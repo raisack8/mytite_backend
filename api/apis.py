@@ -1,6 +1,6 @@
 from rest_framework import viewsets, routers
-from .models import SectionModel,StageModel,UserModel
-from .serializers import SectionModelSerializer,StageModelSerializer, UserModelSerializer
+from .models import SectionModel,StageModel,UserModel,MySectionModel
+from .serializers import SectionModelSerializer,StageModelSerializer, UserModelSerializer,MySectionModelSerializer
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from django.core import serializers
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 from .operates.my_tite import MyTiteGenerator
 
 import datetime
@@ -78,8 +79,6 @@ class UserRegistrationApi(ListCreateAPIView):
         # リクエストからGETパラメータを取得
         user_id = request.data.get('id')
         password = request.data.get('password')
-        print("■■■■ POST")
-        print()
         # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
         queryset = UserModel.objects.filter(user_id=user_id)
         # ユーザーIDが使われているかどうか
@@ -88,8 +87,6 @@ class UserRegistrationApi(ListCreateAPIView):
             "error": "そのログインIDは既に使用されています。別のIDを指定してください。"
             }, status=200)
         serializer = self.serializer_class(queryset, many=True)
-        print("■■■■ POST")
-        print((serializer.data))
 
         # usernameの為にランダムな英数字を生成「user_XXXXXXXX」
         characters = string.ascii_letters + string.digits
@@ -127,17 +124,11 @@ class UserLoginApi(ListCreateAPIView):
     #     return Response(getobj)
     
     def post(self, request, *args, **kwargs):
-        # リクエストからGETパラメータを取得
         user_id = request.data.get('id')
         password = request.data.get('password')
-        print("■■■■ POST")
-        print(user_id)
-        print(password)
         # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
         try:
           user_model = UserModel.objects.get(user_id=user_id)
-          print("----getted")
-          print(user_model.password)
           if user_model.password != password:
             return Response({
               "error": "パスワードが違います。"
@@ -153,6 +144,70 @@ class UserLoginApi(ListCreateAPIView):
                 "username": user_model.username,
             }, status=200)
     
+
+class MySectionAddApi(ListCreateAPIView):
+    queryset = MySectionModel.objects.filter()
+    serializer_class = MySectionModelSerializer
+    permission_classes = []
+    
+    def post(self, request, *args, **kwargs):
+        # リクエストからGETパラメータを取得
+        fes_id = request.data.get('fesId')
+        user_id = request.data.get('userid')
+
+        if user_id == None:
+          return Response({
+            "error": "予定を追加するにはログインしてください。"
+          }, status=200)
+        
+        # target_date = request.data.get('date')
+        start_time = request.data.get('startTime')
+        end_time = request.data.get('endTime')
+        title = request.data.get('title')
+        explain = request.data.get('explain')
+
+        # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
+        try:
+          time_split_st = start_time.split(':')
+          sp_hour_st = int(time_split_st[0])
+          sp_minute_st = int(time_split_st[1])
+
+          time_split_ed = end_time.split(':')
+          sp_hour_ed = int(time_split_ed[0])
+          sp_minute_ed = int(time_split_ed[1])
+          if sp_minute_st % 5 != 0 or sp_minute_ed  % 5 != 0:
+            return Response({
+              "error": "時間は5分単位で入力してください。"
+            }, status=200)
+          
+          # ★★★懸念：9:00~22:00以外の時間を登録してタイテ作ったらどうなるんだろう
+          start_time_dt = datetime.datetime(1899, 12, 30, sp_hour_st, sp_minute_st, 00)
+          end_time_dt = datetime.datetime(1899, 12, 30, sp_hour_ed, sp_minute_ed, 00, 0000)
+          
+          start_time_tz=timezone.datetime(1899, 12, 30, sp_hour_st, sp_minute_st, 00, tzinfo=timezone.utc)
+          
+          minutes = int((end_time_dt-start_time_dt).total_seconds() / 60)
+
+          MySectionModel.objects.create(
+            start_time = start_time_tz,
+            allotted_time = minutes,
+            title = title,
+            other1 = explain,
+            fes_id_id = fes_id,
+            user_id_id = user_id
+          )
+
+        except Exception as e:
+          return Response({
+            "error": e
+            }, status=200)
+        
+        return Response({
+                "error": "",
+                "success": "登録が完了しました。"
+            }, status=200)
+    
+
 # Create your views here.
 class HelloView(APIView):
     '''こちらは使わない？'''

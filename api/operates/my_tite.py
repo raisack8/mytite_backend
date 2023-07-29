@@ -1,4 +1,4 @@
-from ..models import SectionModel,StageModel
+from ..models import SectionModel,StageModel,MySectionModel
 from rest_framework.response import Response
 import datetime
 
@@ -18,20 +18,40 @@ class MyTiteGenerator:
         data = request.data
         # POSTで送られてきたidに紐づくSectionを返す。
         queryset = SectionModel.objects.filter(id__in=data["id"])
-        stage_model = StageModel.objects.filter(fes_id_id=request.data["stage_id"])
-        stage_dict = {}
-        for stage in stage_model:
-          stage_dict[stage.id] = stage.stage_image_path1
-
         if len(queryset) == 0:
           result = {
             'myTiteSections': [],
             'errorMsg': '1つ以上選んで下さい。'
           }
           return {"message": result}
+        # 対象hの日付
+        # date = queryset[0].appearance_date
+        
+        stage_model = StageModel.objects.filter(fes_id_id=request.data["fes_id"])
+        # 後々別パラメーターでリストで取得
+        my_section_model = MySectionModel.objects.filter(
+            # id__in=data["my_sec_id"]
+            fes_id_id=request.data["fes_id"],
+            # date=date,
+            user_id=request.data["user_id"]
+            )
+        
+        my_section_list = []
+        for my_section in my_section_model:
+            my_section_list.append(my_section.id)
+
+        print("■■■■■■■■■■■■■■■■■■■")
+        print(my_section_list)
+
+
+        
+        stage_dict = {}
+        for stage in stage_model:
+          stage_dict[stage.id] = stage.stage_image_path1
 
         res_list = []
         time_list = []
+        # 選択したセクション
         for query in queryset:
             obj={
               'id':query.id,
@@ -51,6 +71,22 @@ class MyTiteGenerator:
               # 'twitter_id':query.twitter_id,
               # 'insta_id':query.insta_id,
               'org_stage_id':query.stage.id
+              }
+            time_list.append(query.start_time)
+            # 選択してきたSectionをリストに格納
+            res_list.append(obj)
+
+        # マイセクション
+        for query in my_section_model:
+            obj={
+              'id':query.id,
+              'fes_id':query.fes_id.id,
+              'stage':0,
+              'start_time':query.start_time,
+              'allotted_time':query.allotted_time,
+              'live_category':1,
+              'artist_name':query.title,
+              'other1':query.other1,
               }
             time_list.append(query.start_time)
             # 選択してきたSectionをリストに格納
@@ -76,7 +112,8 @@ class MyTiteGenerator:
                       copy_sec = res
                       res_list.pop(i)
                       copy_sec['stage'] = stage_id
-                      copy_sec['stage_img_url'] = stage_dict[res['org_stage_id']]
+                      if 'org_stage_id' in res:
+                        copy_sec['stage_img_url'] = stage_dict[res['org_stage_id']]
                       return_list.append(copy_sec)
 
                       # 一致したtimeをtime_listから取り除く
@@ -109,12 +146,16 @@ class MyTiteGenerator:
                   target_time = start_time
                   continue
         except Exception as e:
+            print("■■■ ERROR ■■■")
+            print(e)
             error_msg = "システムエラーが発生しました。"
             # エラーを通知してほしい...
 
         result = {
             'myTiteSections': return_list,
-            'errorMsg': error_msg
+            'errorMsg': error_msg,
+            'orgSectionList':data["id"],
+            'orgMySectionList':my_section_list
         }
 
         return {"message": result}
