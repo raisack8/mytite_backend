@@ -22,6 +22,7 @@ class SectionModelSerializer(serializers.ModelSerializer):
 class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
+        fields = '__all__'
 
 #-  0621 GPT -----------------------------
 
