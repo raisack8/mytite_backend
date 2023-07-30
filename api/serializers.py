@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FesModel, StageModel,CategoryModel,SectionModel,UserModel,MySectionModel
+from .models import FesModel, StageModel,CategoryModel,SectionModel,UserModel,MySectionModel,MyTiteModel
 
 class FesModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,6 +27,11 @@ class UserModelSerializer(serializers.ModelSerializer):
 class MySectionModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = MySectionModel
+        fields = '__all__'
+
+class MyTiteModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MyTiteModel
         fields = '__all__'
 
 #-  0621 GPT -----------------------------

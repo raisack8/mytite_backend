@@ -91,3 +91,4 @@ class MyTiteModel(models.Model):
   slot_num = models.IntegerField()
   title = models.TextField(null=True)
   explain = models.TextField(null=True)
+  fes_id = models.ForeignKey(FesModel, on_delete=models.CASCADE) 

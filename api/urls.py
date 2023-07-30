@@ -12,4 +12,5 @@ urlpatterns = [
     path('user_registration/', apis.UserRegistrationApi.as_view(), name='stages'),
     path('user_login/', apis.UserLoginApi.as_view(), name='stages'),
     path('my_section_add/', apis.MySectionAddApi.as_view(), name='stages'),
+    path('my_tite_save/', apis.MyTiteSaveApi.as_view(), name='stages'),
 ]

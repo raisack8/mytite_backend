@@ -1,6 +1,6 @@
 from rest_framework import viewsets, routers
-from .models import SectionModel,StageModel,UserModel,MySectionModel
-from .serializers import SectionModelSerializer,StageModelSerializer, UserModelSerializer,MySectionModelSerializer
+from .models import SectionModel,StageModel,UserModel,MySectionModel,MyTiteModel
+from .serializers import SectionModelSerializer,StageModelSerializer, UserModelSerializer,MySectionModelSerializer,MyTiteModelSerializer
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -112,16 +112,9 @@ class UserRegistrationApi(ListCreateAPIView):
         
 
 class UserLoginApi(ListCreateAPIView):
-    # 対象とするモデルのオブジェクトを定義
     queryset = UserModel.objects.filter()
-    # APIがデータを返すためのデータ変換ロジックを定義
     serializer_class = UserModelSerializer
-    # 認証
     permission_classes = []
-    # def get(self, request, *args, **kwargs):
-    #     # リクエストからGETパラメータを取得
-    #     getobj = MyTiteGenerator.get(self, request)
-    #     return Response(getobj)
     
     def post(self, request, *args, **kwargs):
         user_id = request.data.get('id')
@@ -138,10 +131,16 @@ class UserLoginApi(ListCreateAPIView):
             "error": "ログインIDが違います。"
             }, status=200)
         
+        my_tite_model = MyTiteModel.objects.filter(
+           user_id_id = user_model.id
+        )
+        mytite_id_list = [obj.id for obj in my_tite_model]
+
         return Response({
                 "error": "",
                 "id": user_model.id,
                 "username": user_model.username,
+                "mytitelist":mytite_id_list
             }, status=200)
     
 
@@ -207,6 +206,45 @@ class MySectionAddApi(ListCreateAPIView):
                 "success": "登録が完了しました。"
             }, status=200)
     
+class MyTiteSaveApi(ListCreateAPIView):
+    queryset = MyTiteModel.objects.filter()
+    serializer_class = MyTiteModelSerializer
+    permission_classes = []
+    
+    def post(self, request, *args, **kwargs):
+        # リクエストからGETパラメータを取得
+
+        user_id = request.data['user_id']
+        sec_list = request.data['sec_list']
+        my_sec_list = request.data['my_sec_list']
+        if len(sec_list)==0 and len(my_sec_list)==0:
+          return Response({
+              "error": "申し訳ありませんが、フェスのアーティスト選択画面に戻って再度みたいアーティストを選択し直してください。"
+            }, status=200)
+
+        my_tite_model = MyTiteModel.objects.filter(
+           user_id_id = user_id
+        )
+        if len(my_tite_model)>=5:
+          return Response({
+              "error": "保存できるマイタイテの数を超えています。"
+            }, status=200)
+        
+        created_model = MyTiteModel.objects.create(
+            section_list = request.data['sec_list'],
+            my_section_list = request.data['my_sec_list'],
+            slot_num = 0,
+            title = '',
+            explain = '',
+            user_id_id = user_id,
+            fes_id_id = request.data['fes_id'],
+          )
+
+        return Response({
+                "error": "",
+                "success": "登録が完了しました。",
+                "modelid": created_model.id
+            }, status=200)
 
 # Create your views here.
 class HelloView(APIView):
