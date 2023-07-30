@@ -161,20 +161,20 @@ class MySectionAddApi(ListCreateAPIView):
           }, status=200)
         
         # target_date = request.data.get('date')
-        start_time = request.data.get('startTime')
-        end_time = request.data.get('endTime')
+        start_time_hour = request.data.get('startTimeHour')
+        start_time_minute = request.data.get('startTimeMinute')
+        end_time_hour = request.data.get('endTimeHour')
+        end_time_minute = request.data.get('endTimeMinute')
         title = request.data.get('title')
         explain = request.data.get('explain')
 
         # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
         try:
-          time_split_st = start_time.split(':')
-          sp_hour_st = int(time_split_st[0])
-          sp_minute_st = int(time_split_st[1])
+          sp_hour_st = int(start_time_hour)
+          sp_minute_st = int(start_time_minute)
 
-          time_split_ed = end_time.split(':')
-          sp_hour_ed = int(time_split_ed[0])
-          sp_minute_ed = int(time_split_ed[1])
+          sp_hour_ed = int(end_time_hour)
+          sp_minute_ed = int(end_time_minute)
           if sp_minute_st % 5 != 0 or sp_minute_ed  % 5 != 0:
             return Response({
               "error": "時間は5分単位で入力してください。"
