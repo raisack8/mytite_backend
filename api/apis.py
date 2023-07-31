@@ -11,7 +11,8 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from .operates.my_tite import MyTiteGenerator
 
-import datetime
+# import datetime
+from datetime import datetime, timedelta
 import random
 import string
 import json
@@ -94,7 +95,7 @@ class UserRegistrationApi(ListCreateAPIView):
         username = 'user_'+random_string
 
         UserModel.objects.create(
-          registration_date=datetime.datetime.today(),
+          registration_date=datetime.today(),
           username=username,
           user_id=user_id,
           password=password,
@@ -143,7 +144,54 @@ class UserLoginApi(ListCreateAPIView):
                 "mytitelist":mytite_id_list
             }, status=200)
     
+class MySectionGetApi(ListCreateAPIView):
+    queryset = MySectionModel.objects.filter()
+    serializer_class = MySectionModelSerializer
+    permission_classes = []
+    
+    def post(self, request, *args, **kwargs):
+        my_sec_list = request.data.get('my_sec_list')
+        
+        if my_sec_list == '':
+            # my_secが登録されていなかったら
+            return Response({
+                "error": "",
+                "data":{}
+            }, status=200)
+        
+        parse_list = json.loads(f"[{my_sec_list}]")
+        queryset = MySectionModel.objects.filter(id__in=parse_list)
+        print(queryset)
 
+        obj_list = []
+
+        for query in queryset:
+            
+            end_time = query.start_time + timedelta(minutes=query.allotted_time)
+            # start_timeとend_timeを指定された形式に変換する
+            start_time_str = query.start_time.strftime('%H:%M')  # '12:30'となる
+            end_time_str = end_time.strftime('%H:%M')  # '14:30'となる
+
+            obj={
+              'id':query.id,
+              'create_date':query.create_date,
+              'start_time':query.start_time,
+              'allotted_time':query.allotted_time,
+              'display_start_time': start_time_str,
+              'display_end_time': end_time_str,
+              # stage_idを仮指定
+              'title':query.title,
+              'other1':query.other1,
+              'other2':query.other2,
+              }
+            obj_list.append(obj)
+
+        # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
+        return Response({
+                "error": "",
+                "data": obj_list
+            }, status=200)
+            
 class MySectionAddApi(ListCreateAPIView):
     queryset = MySectionModel.objects.filter()
     serializer_class = MySectionModelSerializer
@@ -158,7 +206,6 @@ class MySectionAddApi(ListCreateAPIView):
           return Response({
             "error": "予定を追加するにはログインしてください。"
           }, status=200)
-        
         # target_date = request.data.get('date')
         start_time_hour = request.data.get('startTimeHour')
         start_time_minute = request.data.get('startTimeMinute')
@@ -168,42 +215,50 @@ class MySectionAddApi(ListCreateAPIView):
         explain = request.data.get('explain')
 
         # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
-        try:
-          sp_hour_st = int(start_time_hour)
-          sp_minute_st = int(start_time_minute)
+        sp_hour_st = int(start_time_hour)
+        sp_minute_st = int(start_time_minute)
 
-          sp_hour_ed = int(end_time_hour)
-          sp_minute_ed = int(end_time_minute)
-          if sp_minute_st % 5 != 0 or sp_minute_ed  % 5 != 0:
-            return Response({
-              "error": "時間は5分単位で入力してください。"
-            }, status=200)
-          
-          # ★★★懸念：9:00~22:00以外の時間を登録してタイテ作ったらどうなるんだろう
-          start_time_dt = datetime.datetime(1899, 12, 30, sp_hour_st, sp_minute_st, 00)
-          end_time_dt = datetime.datetime(1899, 12, 30, sp_hour_ed, sp_minute_ed, 00, 0000)
-          
-          start_time_tz=timezone.datetime(1899, 12, 30, sp_hour_st, sp_minute_st, 00, tzinfo=timezone.utc)
-          
-          minutes = int((end_time_dt-start_time_dt).total_seconds() / 60)
-
-          MySectionModel.objects.create(
-            start_time = start_time_tz,
-            allotted_time = minutes,
-            title = title,
-            other1 = explain,
-            fes_id_id = fes_id,
-            user_id_id = user_id
-          )
-
-        except Exception as e:
+        sp_hour_ed = int(end_time_hour)
+        sp_minute_ed = int(end_time_minute)
+        if sp_minute_st % 5 != 0 or sp_minute_ed  % 5 != 0:
           return Response({
-            "error": e
-            }, status=200)
+            "error": "時間は5分単位で入力してください。"
+          }, status=200)
         
+        # ★★★懸念：9:00~22:00以外の時間を登録してタイテ作ったらどうなるんだろう
+        start_time_dt = datetime(1899, 12, 30, sp_hour_st, sp_minute_st, 00, 0000)
+        end_time_dt = datetime(1899, 12, 30, sp_hour_ed, sp_minute_ed, 00, 0000)
+        
+        start_time_tz=timezone.datetime(1899, 12, 30, sp_hour_st, sp_minute_st, 00, tzinfo=timezone.utc)
+        
+        minutes = int((end_time_dt-start_time_dt).total_seconds() / 60)
+
+        my_section_model = MySectionModel.objects.create(
+          start_time = start_time_tz,
+          allotted_time = minutes,
+          title = title,
+          other1 = explain,
+          other2 = '',
+          fes_id_id = fes_id,
+          user_id_id = user_id
+        )
+
+        # obj={
+        #   'create_date':my_section_model.create_date,
+        #   'start_time':start_time_tz,
+        #   'allotted_time':minutes,
+        #   'display_start_time': start_time_dt.strftime('%H:%M'),
+        #   'display_end_time': end_time_dt.strftime('%H:%M'),
+        #   # stage_idを仮指定
+        #   'title':title,
+        #   'other1':explain,
+        #   'other2':'',
+        # }
+
         return Response({
                 "error": "",
-                "success": "登録が完了しました。"
+                "success": "登録が完了しました。",
+                "data": my_section_model.id
             }, status=200)
     
 class MyTiteSaveApi(ListCreateAPIView):

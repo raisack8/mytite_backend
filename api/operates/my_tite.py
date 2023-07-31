@@ -1,6 +1,7 @@
 from ..models import SectionModel,StageModel,MySectionModel
 from rest_framework.response import Response
 import datetime
+import json
 
 
 class MyTiteGenerator:
@@ -17,7 +18,15 @@ class MyTiteGenerator:
         # POSTリクエストで送信されたデータを取得する
         data = request.data
         # POSTで送られてきたidに紐づくSectionを返す。
-        queryset = SectionModel.objects.filter(id__in=data["id"])
+        print("===============")
+        print(data)
+        target_sec_id_list = data["id"] 
+        if type(target_sec_id_list)!=list:
+          parse_list_org_sec = json.loads(f"[{target_sec_id_list}]")
+        else:
+          parse_list_org_sec = data["id"] 
+
+        queryset = SectionModel.objects.filter(id__in=parse_list_org_sec)
         if len(queryset) == 0:
           result = {
             'myTiteSections': [],
@@ -26,24 +35,8 @@ class MyTiteGenerator:
           return {"message": result}
         # 対象hの日付
         # date = queryset[0].appearance_date
-        
         stage_model = StageModel.objects.filter(fes_id_id=request.data["fes_id"])
         # 後々別パラメーターでリストで取得
-        my_section_model = MySectionModel.objects.filter(
-            # id__in=data["my_sec_id"]
-            fes_id_id=request.data["fes_id"],
-            # date=date,
-            user_id=request.data["user_id"]
-            )
-        
-        my_section_list = []
-        for my_section in my_section_model:
-            my_section_list.append(my_section.id)
-
-        print("■■■■■■■■■■■■■■■■■■■")
-        print(my_section_list)
-
-
         
         stage_dict = {}
         for stage in stage_model:
@@ -76,25 +69,46 @@ class MyTiteGenerator:
             # 選択してきたSectionをリストに格納
             res_list.append(obj)
 
-        # マイセクション
-        for query in my_section_model:
-            obj={
-              'id':query.id,
-              'fes_id':query.fes_id.id,
-              'stage':0,
-              'start_time':query.start_time,
-              'allotted_time':query.allotted_time,
-              'live_category':1,
-              'artist_name':query.title,
-              'other1':query.other1,
-              }
-            time_list.append(query.start_time)
-            # 選択してきたSectionをリストに格納
-            res_list.append(obj)
+        #======================= 【my_secが取得できたら】=========
+
+        my_sec_list = request.data.get('my_sec_list')
+        
+        if my_sec_list != None:
+          parse_list = json.loads(f"[{my_sec_list}]")
+          my_section_model = MySectionModel.objects.filter(id__in=parse_list)
+          # マイセクション
+          for query in my_section_model:
+              obj={
+                'id':query.id,
+                'fes_id':query.fes_id.id,
+                'stage':0,
+                'start_time':query.start_time,
+                'allotted_time':query.allotted_time,
+                'live_category':1,
+                'artist_name':query.title,
+                'other1':query.other1,
+                }
+              time_list.append(query.start_time)
+              # 選択してきたSectionをリストに格納
+              res_list.append(obj)
+        else:
+          my_section_model = MySectionModel.objects.filter(
+            # id__in=data["my_sec_id"]
+            fes_id_id=request.data["fes_id"],
+            # date=date,
+            user_id=request.data["user_id"]
+            )
+          
+        my_section_list = []
+        for my_section in my_section_model:
+            my_section_list.append(my_section.id)
+        
+
+
+        #======================= 【いよいよ合体処理...】=========
 
         # 各Sectionのstart_timeを時間順にソート
         time_list.sort()
-
         continue_flag = True
         start_time = time_list[0]
         end_time = time_list[len(time_list)-1]
@@ -103,59 +117,64 @@ class MyTiteGenerator:
         return_list = []
         error_msg = ""
 
-        try:
+        print(res_list)
+        # try:
           # 自分でもよくわからないアルゴリズム、、
-          while continue_flag:
-              for i,res in enumerate(res_list):
-                  # target_timeと同じresのデータを探す
-                  if res['start_time'] == target_time:
-                      copy_sec = res
-                      res_list.pop(i)
-                      copy_sec['stage'] = stage_id
-                      if 'org_stage_id' in res:
-                        copy_sec['stage_img_url'] = stage_dict[res['org_stage_id']]
-                      return_list.append(copy_sec)
+        while continue_flag:
+            for i,res in enumerate(res_list):
+                # target_timeと同じresのデータを探す
+                if res['start_time'] == target_time:
+                    copy_sec = res
+                    res_list.pop(i)
+                    copy_sec['stage'] = stage_id
+                    print("=============res")
+                    print(res)
+                    if 'org_stage_id' in res:
+                      copy_sec['stage_img_url'] = stage_dict[res['org_stage_id']]
+                    return_list.append(copy_sec)
 
-                      # 一致したtimeをtime_listから取り除く
-                      for j ,time in enumerate(time_list):
-                          if time == target_time:
-                              time_list.pop(j)
-                              break
-                      # 後ほど5足すので5引いておく、的な？
-                      target_time = target_time + datetime.timedelta(minutes=copy_sec['allotted_time']-5)
-                      continue
-              if len(time_list) == 0:
-                  continue_flag = False
-                  # ループ終了
-                  break
+                    # 一致したtimeをtime_listから取り除く
+                    for j ,time in enumerate(time_list):
+                        if time == target_time:
+                            time_list.pop(j)
+                            break
+                    # 後ほど5足すので5引いておく、的な？
+                    target_time = target_time + datetime.timedelta(minutes=copy_sec['allotted_time']-5)
+                    continue
+            if len(time_list) == 0:
+                continue_flag = False
+                # ループ終了
+                break
 
-              if target_time <= end_time:
-                  # 5分繰り上げて再ループ
-                  target_time = target_time + datetime.timedelta(minutes=5)
-                  continue
-              else:
-                  stage_id = stage_id + 1
-                  if stage_id==4:
-                      # インデックスオーバー強制終了
-                      result = {
-                          'myTiteSections': [],
-                          'errorMsg': "並行して表示できる数を超えています。"
-                      }
-                      return {"message": result}
+            if target_time <= end_time:
+                # 5分繰り上げて再ループ
+                target_time = target_time + datetime.timedelta(minutes=5)
+                continue
+            else:
+                stage_id = stage_id + 1
+                if stage_id==4:
+                    # インデックスオーバー強制終了
+                    result = {
+                        'myTiteSections': [],
+                        'errorMsg': "並行して表示できる数を超えています。"
+                    }
+                    return {"message": result}
 
-                  target_time = start_time
-                  continue
-        except Exception as e:
-            print("■■■ ERROR ■■■")
-            print(e)
-            error_msg = "システムエラーが発生しました。"
-            # エラーを通知してほしい...
-
+                target_time = start_time
+                continue
+      # except Exception as e:
+      #     print("■■■ ERROR ■■■")
+      #     print(e)
+      #     error_msg = "システムエラーが発生しました。"
+      #     # エラーを通知してほしい...
+        print("============RESULT==============")
+        print(return_list)
         result = {
             'myTiteSections': return_list,
             'errorMsg': error_msg,
             'orgSectionList':data["id"],
-            'orgMySectionList':my_section_list
+            'orgMySectionList':my_section_list,
+            'displayedSectionList':request.data.get('my_sec_list')
         }
 
         return {"message": result}
