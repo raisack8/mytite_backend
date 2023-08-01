@@ -112,6 +112,42 @@ class UserRegistrationApi(ListCreateAPIView):
                 "username": username,
             }, status=200)
         
+class UserInfoRegistrationApi(ListCreateAPIView):
+    queryset = UserModel.objects.filter()
+    serializer_class = UserModelSerializer
+    permission_classes = []
+    
+    def post(self, request, *args, **kwargs):
+        # リクエストからGETパラメータを取得
+        print("=== UserInfoRegistrationApi")
+        user_id = request.data.get('id')
+        username = request.data.get('username')
+        change_flag = request.data.get('change_flag')
+        print(change_flag)
+        if not change_flag:
+          return Response({
+                "error": "",
+                "id": user_id,
+                "username": '',
+            }, status=200)
+        # ユーザー名が既に存在していないか
+        queryset = UserModel.objects.filter(username=username)
+        if len(queryset) != 0:
+          return Response({
+            "error": "そのユーザー名は既に使用されています。別のユーザー名を指定してください。"
+            }, status=200)
+
+        # ユーザー名が使われていなかったらDBを更新する
+        user_model = UserModel.objects.get(id=user_id)
+        user_model.username = username
+        user_model.save()
+
+        return Response({
+                "error": "",
+                "id": user_model.id,
+                "username": username,
+            }, status=200)
+        
 
 class UserLoginApi(ListCreateAPIView):
     queryset = UserModel.objects.filter()
@@ -232,6 +268,10 @@ class MySectionAddApi(ListCreateAPIView):
         start_time_tz=timezone.datetime(1899, 12, 30, sp_hour_st, sp_minute_st, 00, tzinfo=timezone.utc)
         
         minutes = int((end_time_dt-start_time_dt).total_seconds() / 60)
+        if minutes < 10:
+          return Response({
+            "error": "予定は必ず10分以上としてください"
+          }, status=200)
 
         my_section_model = MySectionModel.objects.create(
           start_time = start_time_tz,
@@ -242,18 +282,6 @@ class MySectionAddApi(ListCreateAPIView):
           fes_id_id = fes_id,
           user_id_id = user_id
         )
-
-        # obj={
-        #   'create_date':my_section_model.create_date,
-        #   'start_time':start_time_tz,
-        #   'allotted_time':minutes,
-        #   'display_start_time': start_time_dt.strftime('%H:%M'),
-        #   'display_end_time': end_time_dt.strftime('%H:%M'),
-        #   # stage_idを仮指定
-        #   'title':title,
-        #   'other1':explain,
-        #   'other2':'',
-        # }
 
         return Response({
                 "error": "",
@@ -310,7 +338,56 @@ class MyTiteGetApi(ListCreateAPIView):
         postobj = MyTiteGeneratorFromSlot.post(self, request)
         return Response(postobj)
 
+class SectionDataGet(ListCreateAPIView):
+    def post(self, request, *args, **kwargs):
+        # POSTリクエストで送信されたデータを取得する
+        section_model = SectionModel.objects.get(id=request.data["id"])
+        print(section_model.id)
+        obj = {
+          'id': section_model.id,
+          'appearance_date': section_model.appearance_date,
+          'start_time': section_model.start_time,
+          'allotted_time': section_model.allotted_time,
+          'artist_name': section_model.artist_name,
+          'change_time_flg': section_model.change_time_flg,
+          'other1': section_model.other1,
+          'other2': section_model.other2,
+          'other3': section_model.other3,
+          'other4': section_model.other4,
+          'other5': section_model.other5,
+          'official_url': section_model.official_url,
+          'twitter_id': section_model.twitter_id,
+          'insta_id': section_model.insta_id,
+          'fes_id_id': section_model.fes_id_id,
+          'live_category_id': section_model.live_category_id,
+          'stage_id': section_model.stage_id,
+          'apparence_flg': section_model.apparence_flg,
+        }
+        return Response(obj)
 
+
+class SectionDataUpdate(ListCreateAPIView):
+    def post(self, request, *args, **kwargs):
+        section_model = SectionModel.objects.get(id=request.data["id"])
+        section_model.appearance_date = request.data["appearance_date"]
+        section_model.start_time = request.data["start_time"]
+        section_model.allotted_time = request.data["allotted_time"]
+        section_model.artist_name = request.data["artist_name"]
+        section_model.other1 = request.data["other1"]
+        section_model.other2 = request.data["other2"]
+        section_model.other3 = request.data["other3"]
+        section_model.other4 = request.data["other4"]
+        section_model.other5 = request.data["other5"]
+        section_model.official_url = request.data["official_url"]
+        section_model.twitter_id = request.data["twitter_id"]
+        section_model.insta_id = request.data["insta_id"]
+        section_model.stage_id = request.data["stage_id"]
+        section_model.save()
+        # POSTリクエストで送信されたデータを取得する
+        return Response({
+                "error": "",
+                "success": "更新が完了しました。",
+            }, status=200)
 
 router = routers.DefaultRouter()
 # router.register(r'sections', SectionViewSet)

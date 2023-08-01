@@ -44,8 +44,13 @@ class SectionModel(models.Model):
   artist_name = models.TextField()
   apparence_flg = models.BooleanField(default=True)
   change_time_flg = models.BooleanField(null=True)
+  # other1 = セカンドタイトル
   other1 = models.TextField(null=True)
+  # other2 = 画像URL(例：/resources/tif2023/Appare.jpg)
   other2 = models.TextField(null=True)
+  other3 = models.TextField(null=True)
+  other4 = models.TextField(null=True)
+  other5 = models.TextField(null=True)
   official_url =  models.TextField(null=True)
   twitter_id =  models.TextField(null=True)
   insta_id =  models.TextField(null=True)
