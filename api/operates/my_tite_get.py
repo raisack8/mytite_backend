@@ -1,41 +1,34 @@
-from ..models import SectionModel,StageModel,MySectionModel
+from ..models import SectionModel,StageModel,MySectionModel,MyTiteModel
 from rest_framework.response import Response
 import datetime
 import json
 
 
-class MyTiteGenerator:
-    @classmethod
-    def get(self, obj ,request):
-        param_value = request.query_params.get('id')
-        # idパラメータを使ってモデルオブジェクトをフィルタリングして取得
-        queryset = SectionModel.objects.filter(fes_id=param_value)
-        serializer = obj.serializer_class(queryset, many=True)
-        return serializer.data
+class MyTiteGeneratorFromSlot:
 
     @classmethod
     def post(self, obj, request):
         # POSTリクエストで送信されたデータを取得する
         data = request.data
+        print("=======================MY TITE GET")
+        print(request.data)
         # POSTで送られてきたidに紐づくSectionを返す。
-        target_sec_id_list = data["id"] 
-        if type(target_sec_id_list)!=list:
-          parse_list_org_sec = json.loads(f"[{target_sec_id_list}]")
+
+        my_tite_model = MyTiteModel.objects.get(id=request.data["my_tite_id"])
+        # 後々別パラメーターでリストで取得
+        section_model_list = my_tite_model.section_list
+        my_section_model_list = my_tite_model.my_section_list
+        fes_id = my_tite_model.fes_id_id
+
+        # POSTで送られてきたidに紐づくSectionを返す。
+        if type(section_model_list)!=list:
+          parse_list_org_sec = json.loads(f"[{section_model_list}]")
         else:
           parse_list_org_sec = data["id"] 
+        queryset_sec = SectionModel.objects.filter(id__in=parse_list_org_sec)
 
-        queryset = SectionModel.objects.filter(id__in=parse_list_org_sec)
-        if len(queryset) == 0:
-          result = {
-            'myTiteSections': [],
-            'errorMsg': '1つ以上選んで下さい。'
-          }
-          return {"message": result}
-        # 対象hの日付
-        # date = queryset[0].appearance_date
-        stage_model = StageModel.objects.filter(fes_id_id=request.data["fes_id"])
-        # 後々別パラメーターでリストで取得
-        
+        stage_model = StageModel.objects.filter(fes_id_id=fes_id)
+
         stage_dict = {}
         for stage in stage_model:
           stage_dict[stage.id] = stage.stage_image_path1
@@ -43,7 +36,7 @@ class MyTiteGenerator:
         res_list = []
         time_list = []
         # 選択したセクション
-        for query in queryset:
+        for query in queryset_sec:
             obj={
               'id':query.id,
               'fes_id':query.fes_id.id,
@@ -69,10 +62,10 @@ class MyTiteGenerator:
 
         #======================= 【my_secが取得できたら】=========
 
-        my_sec_list = request.data.get('my_sec_list')
+        # POSTで送られてきたidに紐づくMySectionを返す。
         
-        if my_sec_list != None:
-          parse_list = json.loads(f"[{my_sec_list}]")
+        if my_section_model_list != None:
+          parse_list = json.loads(f"[{my_section_model_list}]")
           my_section_model = MySectionModel.objects.filter(id__in=parse_list)
           # マイセクション
           for query in my_section_model:
@@ -160,26 +153,27 @@ class MyTiteGenerator:
             
         org_my_section_model = MySectionModel.objects.filter(
             # id__in=data["my_sec_id"]
-            fes_id_id=request.data["fes_id"],
+            fes_id_id=fes_id,
             # date=date,
             user_id=request.data["user_id"]
             )
+        
         org_my_section_list = []
         for my_section in org_my_section_model:
             org_my_section_list.append(my_section.id)
 
-        if my_sec_list != None:
-            parse_list = json.loads(f"[{my_sec_list}]")
-            for my_sec in parse_list:
-               if my_sec in org_my_section_list:
-                  org_my_section_list.remove(my_sec)
+        # if my_sec_list != None:
+        #     parse_list = json.loads(f"[{my_sec_list}]")
+        #     for my_sec in parse_list:
+        #        if my_sec in org_my_section_list:
+        #           org_my_section_list.remove(my_sec)
 
         result = {
             'myTiteSections': return_list,
             'errorMsg': error_msg,
-            'orgSectionList':data["id"],
+            'orgSectionList':section_model_list,
             'orgMySectionList':org_my_section_list,
-            'displayedSectionList':my_sec_list
+            'displayedSectionList':my_section_model_list
         }
 
         return {"message": result}

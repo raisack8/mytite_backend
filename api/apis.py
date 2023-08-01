@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from .operates.my_tite import MyTiteGenerator
+from .operates.my_tite_get import MyTiteGeneratorFromSlot
 
 # import datetime
 from datetime import datetime, timedelta
@@ -161,7 +162,6 @@ class MySectionGetApi(ListCreateAPIView):
         
         parse_list = json.loads(f"[{my_sec_list}]")
         queryset = MySectionModel.objects.filter(id__in=parse_list)
-        print(queryset)
 
         obj_list = []
 
@@ -268,7 +268,6 @@ class MyTiteSaveApi(ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         # リクエストからGETパラメータを取得
-
         user_id = request.data['user_id']
         sec_list = request.data['sec_list']
         my_sec_list = request.data['my_sec_list']
@@ -301,28 +300,17 @@ class MyTiteSaveApi(ListCreateAPIView):
                 "modelid": created_model.id
             }, status=200)
 
-# Create your views here.
-class HelloView(APIView):
-    '''こちらは使わない？'''
-    def get(self, request):
-      print("++++++++++++")
-      get_id = int(request.GET.get("fes_id"))
-      # get_obj = SectionModel.objects.filter(fes_id=get_id)
-      get_obj = SectionModel.objects.all()
-      output_data = serializers.serialize(
-        "json",get_obj
-        )
-      print(output_data)
-      return Response(output_data)
-      # return HttpResponse(enc,
-      #                     content_type="text/json-comment-filtered",
-      #                     charset="UTF-8")
-    def post(self, request):
-      data = request.data
-      print("++++++++++++")
-      return HttpResponse("{'status':'OK'}",
-                          content_type="text/json-comment-filtered",
-                          charset='UTF-8')
+class MyTiteGetApi(ListCreateAPIView):
+    queryset = MyTiteModel.objects.filter()
+    serializer_class = MyTiteModelSerializer
+    permission_classes = []
+    
+    def post(self, request, *args, **kwargs):
+        # POSTリクエストで送信されたデータを取得する
+        postobj = MyTiteGeneratorFromSlot.post(self, request)
+        return Response(postobj)
+
+
 
 router = routers.DefaultRouter()
 # router.register(r'sections', SectionViewSet)
