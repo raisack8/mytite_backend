@@ -54,7 +54,8 @@ class MyTiteGeneratorFromSlot:
               # 'official_url':query.official_url,
               # 'twitter_id':query.twitter_id,
               # 'insta_id':query.insta_id,
-              'org_stage_id':query.stage.id
+              'org_stage_id':query.stage.id,
+              'section_category':1
               }
             time_list.append(query.start_time)
             # 選択してきたSectionをリストに格納
@@ -78,6 +79,7 @@ class MyTiteGeneratorFromSlot:
                 'live_category':1,
                 'artist_name':query.title,
                 'other1':query.other1,
+                'section_category':1
                 }
               time_list.append(query.start_time)
               # 選択してきたSectionをリストに格納
