@@ -1,5 +1,5 @@
 from rest_framework import viewsets, routers
-from .models import SectionModel,StageModel,UserModel,MySectionModel,MyTiteModel
+from .models import SectionModel,StageModel,UserModel,MySectionModel,MyTiteModel,FesModel
 from .serializers import SectionModelSerializer,StageModelSerializer, UserModelSerializer,MySectionModelSerializer,MyTiteModelSerializer
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -392,3 +392,55 @@ router = routers.DefaultRouter()
 # router.register(r'sections', SectionViewSet)
 # router.register(r'test', TestSet)
 # router.register(r'api', HelloView)
+
+class OperateDbFesCreate(ListCreateAPIView):
+    def post(self, request, *args, **kwargs):
+        fes_model = FesModel()
+        fes_model.name = request.data["name"]
+        fes_model.year = request.data["year"]
+        fes_model.eventDate = request.data["eventDate"]
+        fes_model.save()
+        # POSTリクエストで送信されたデータを取得する
+        return Response({"error": "","success": "更新が完了しました。",
+            }, status=200)
+    
+class OperateDbStageCreate(ListCreateAPIView):
+    def post(self, request, *args, **kwargs):
+        stage_model = StageModel()
+        stage_model.stage_id = request.data["stage_id"]
+        stage_model.name = request.data["name"]
+        stage_model.place = request.data["place"]
+        stage_model.color = request.data["color"]
+        # 外部キーなので注意
+        stage_model.fes_id_id = request.data["fes_id_id"]
+        stage_model.stage_image_path1 = request.data["stage_image_path1"]
+        stage_model.save()
+        # POSTリクエストで送信されたデータを取得する
+        return Response({"error": "","success": "更新が完了しました。",
+            }, status=200)
+    
+class OperateDbSectionCreate(ListCreateAPIView):
+    def post(self, request, *args, **kwargs):
+        section_model = SectionModel()
+        section_model.appearance_date = request.data["appearance_date"]
+        section_model.start_time = request.data["start_time"]
+        section_model.allotted_time = request.data["allotted_time"]
+        section_model.artist_name = request.data["artist_name"]
+        section_model.other1 = request.data["other1"]
+        section_model.other2 = request.data["other2"]
+        section_model.other3 = request.data["other3"]
+        section_model.other4 = request.data["other4"]
+        section_model.other5 = request.data["other5"]
+        section_model.official_url = request.data["official_url"]
+        section_model.twitter_id = request.data["twitter_id"]
+        section_model.insta_id = request.data["insta_id"]
+        section_model.fes_id_id = request.data["stage_id"]
+        section_model.live_category_id = request.data["stage_id"]
+        section_model.stage_id = request.data["stage_id"]
+        section_model.save()
+
+        # POSTリクエストで送信されたデータを取得する
+        return Response({
+                "error": "",
+                "success": "更新が完了しました。",
+            }, status=200)

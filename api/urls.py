@@ -17,4 +17,10 @@ urlpatterns = [
     path('my_tite_get/', apis.MyTiteGetApi.as_view(), name='my_tite_get'),
     path('section_data_get/', apis.SectionDataGet.as_view(), name='section_data_get'),
     path('section_data_update/', apis.SectionDataUpdate.as_view(), name='section_data_update'),
+    
+    
+    # 付け焼刃
+    path('operate_db_fes_create/', apis.OperateDbFesCreate.as_view(), name='section_data_update'),
+    path('operate_db_stage_create/', apis.OperateDbStageCreate.as_view(), name='section_data_update'),
+    path('operate_db_section_create/', apis.OperateDbSectionCreate.as_view(), name='section_data_update'),
 ]
