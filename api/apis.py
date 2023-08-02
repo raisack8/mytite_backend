@@ -188,7 +188,6 @@ class MySectionGetApi(ListCreateAPIView):
     
     def post(self, request, *args, **kwargs):
         my_sec_list = request.data.get('my_sec_list')
-        
         if my_sec_list == '':
             # my_secが登録されていなかったら
             return Response({

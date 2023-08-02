@@ -1,4 +1,4 @@
-from ..models import SectionModel,StageModel,MySectionModel,MyTiteModel
+from ..models import SectionModel,StageModel,MySectionModel,MyTiteModel,FesModel
 from rest_framework.response import Response
 import datetime
 import json
@@ -10,8 +10,6 @@ class MyTiteGeneratorFromSlot:
     def post(self, obj, request):
         # POSTリクエストで送信されたデータを取得する
         data = request.data
-        print("=======================MY TITE GET")
-        print(request.data)
         # POSTで送られてきたidに紐づくSectionを返す。
 
         my_tite_model = MyTiteModel.objects.get(id=request.data["my_tite_id"])
@@ -28,6 +26,10 @@ class MyTiteGeneratorFromSlot:
         queryset_sec = SectionModel.objects.filter(id__in=parse_list_org_sec)
 
         stage_model = StageModel.objects.filter(fes_id_id=fes_id)
+
+        # フェスIDを取得する
+        first_section_model = queryset_sec.first()
+        fes_model = FesModel.objects.filter(id=first_section_model.fes_id_id)
 
         stage_dict = {}
         for stage in stage_model:
@@ -175,7 +177,8 @@ class MyTiteGeneratorFromSlot:
             'errorMsg': error_msg,
             'orgSectionList':section_model_list,
             'orgMySectionList':org_my_section_list,
-            'displayedSectionList':my_section_model_list
+            'displayedSectionList':my_section_model_list,
+            'fesName':fes_model.first().name
         }
 
         return {"message": result}

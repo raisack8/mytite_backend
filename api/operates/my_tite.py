@@ -1,4 +1,4 @@
-from ..models import SectionModel,StageModel,MySectionModel
+from ..models import SectionModel,StageModel,MySectionModel,FesModel
 from rest_framework.response import Response
 import datetime
 import json
@@ -17,7 +17,6 @@ class MyTiteGenerator:
     def post(self, obj, request):
         # POSTリクエストで送信されたデータを取得する
         data = request.data
-        print("===============")
         print(data)
         # POSTで送られてきたidに紐づくSectionを返す。
         target_sec_id_list = data["id"] 
@@ -41,6 +40,7 @@ class MyTiteGenerator:
         # date = queryset[0].appearance_date
         stage_model = StageModel.objects.filter(fes_id_id=request.data["fes_id"])
         # 後々別パラメーターでリストで取得
+        fes_model = FesModel.objects.filter(id=request.data["fes_id"])
         
         stage_dict = {}
         for stage in stage_model:
@@ -185,7 +185,8 @@ class MyTiteGenerator:
             'errorMsg': error_msg,
             'orgSectionList':data["id"],
             'orgMySectionList':org_my_section_list,
-            'displayedSectionList':my_sec_list
+            'displayedSectionList':my_sec_list,
+            'fesName':fes_model.first().name
         }
 
         return {"message": result}
