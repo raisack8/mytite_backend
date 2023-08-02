@@ -17,12 +17,18 @@ class MyTiteGenerator:
     def post(self, obj, request):
         # POSTリクエストで送信されたデータを取得する
         data = request.data
+        print("===============")
+        print(data)
         # POSTで送られてきたidに紐づくSectionを返す。
         target_sec_id_list = data["id"] 
         if type(target_sec_id_list)!=list:
           parse_list_org_sec = json.loads(f"[{target_sec_id_list}]")
         else:
           parse_list_org_sec = data["id"] 
+
+        delete_flag = ''
+        if 'delete_flag' in data:
+           delete_flag = data['delete_flag']
 
         queryset = SectionModel.objects.filter(id__in=parse_list_org_sec)
         if len(queryset) == 0:
@@ -62,7 +68,7 @@ class MyTiteGenerator:
               # 'twitter_id':query.twitter_id,
               # 'insta_id':query.insta_id,
               'org_stage_id':query.stage.id,
-              'section_category':0
+              'delete_flag':''
               }
             time_list.append(query.start_time)
             # 選択してきたSectionをリストに格納
@@ -86,7 +92,7 @@ class MyTiteGenerator:
                 'live_category':1,
                 'artist_name':query.title,
                 'other1':query.other1,
-                'section_category':1,
+                'delete_flag':delete_flag,
                 }
               time_list.append(query.start_time)
               # 選択してきたSectionをリストに格納
@@ -103,8 +109,6 @@ class MyTiteGenerator:
         for my_section in my_section_model:
             my_section_list.append(my_section.id)
         
-
-
         #======================= 【いよいよ合体処理...】=========
 
         # 各Sectionのstart_timeを時間順にソート
