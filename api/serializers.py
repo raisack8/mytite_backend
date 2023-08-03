@@ -4,6 +4,7 @@ from .models import FesModel, StageModel,CategoryModel,SectionModel,UserModel,My
 class FesModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = FesModel
+        fields = '__all__'
 
 class StageModelSerializer(serializers.ModelSerializer):
     class Meta:

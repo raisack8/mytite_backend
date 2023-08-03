@@ -20,6 +20,7 @@ urlpatterns = [
     
     
     # 付け焼刃
+    path('fes_stage_section_return/', apis.AllModelReturn.as_view(), name='section_data_update'),
     path('operate_db_fes_create/', apis.OperateDbFesCreate.as_view(), name='section_data_update'),
     path('operate_db_stage_create/', apis.OperateDbStageCreate.as_view(), name='section_data_update'),
     path('operate_db_section_create/', apis.OperateDbSectionCreate.as_view(), name='section_data_update'),

@@ -1,6 +1,6 @@
 from rest_framework import viewsets, routers
 from .models import SectionModel,StageModel,UserModel,MySectionModel,MyTiteModel,FesModel
-from .serializers import SectionModelSerializer,StageModelSerializer, UserModelSerializer,MySectionModelSerializer,MyTiteModelSerializer
+from .serializers import SectionModelSerializer,StageModelSerializer, UserModelSerializer,MySectionModelSerializer,MyTiteModelSerializer,FesModelSerializer
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -392,38 +392,69 @@ router = routers.DefaultRouter()
 # router.register(r'sections', SectionViewSet)
 # router.register(r'test', TestSet)
 # router.register(r'api', HelloView)
+class AllModelReturn(ListCreateAPIView):    
+   def post(self, request, *args, **kwargs):
+        all_fes_model = FesModel.objects.all()
+        all_stage_model = StageModel.objects.all()
+        all_section_model = SectionModel.objects.all().order_by('-id')[:50]
+       
+        fes_serializer = FesModelSerializer(all_fes_model, many=True)
+        stage_serializer = StageModelSerializer(all_stage_model, many=True)
+        section_serializer = SectionModelSerializer(all_section_model, many=True)
+        
+        return Response({
+            "error": "",
+            "success": "更新が完了しました。",
+            "fes":fes_serializer.data,
+            "stage":stage_serializer.data,
+            "section":section_serializer.data,
+            }, status=200)
 
 class OperateDbFesCreate(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         fes_model = FesModel()
         fes_model.name = request.data["name"]
         fes_model.year = request.data["year"]
-        fes_model.eventDate = request.data["eventDate"]
+        fes_model.event_date = request.data["eventDate"]
         fes_model.save()
         # POSTリクエストで送信されたデータを取得する
-        return Response({"error": "","success": "更新が完了しました。",
+        return Response({
+            "error": "",
+            "success": "更新が完了しました。",
+            "data":f"{fes_model.id}:{fes_model.name}",
             }, status=200)
     
 class OperateDbStageCreate(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         stage_model = StageModel()
-        stage_model.stage_id = request.data["stage_id"]
-        stage_model.name = request.data["name"]
-        stage_model.place = request.data["place"]
+        stage_model.stage_id = request.data["stageId"]
+        stage_model.name = request.data["stageName"]
+        stage_model.place = request.data["color"]
         stage_model.color = request.data["color"]
         # 外部キーなので注意
-        stage_model.fes_id_id = request.data["fes_id_id"]
-        stage_model.stage_image_path1 = request.data["stage_image_path1"]
+        stage_model.fes_id_id = request.data["fesIdId"]
+        stage_model.stage_image_path1 = request.data["stageImagePath1"]
         stage_model.save()
         # POSTリクエストで送信されたデータを取得する
-        return Response({"error": "","success": "更新が完了しました。",
+        return Response({
+            "error": "",
+            "success": "更新が完了しました。",
+            "data":f"{stage_model.id}:{stage_model.name}",
             }, status=200)
     
 class OperateDbSectionCreate(ListCreateAPIView):
-    def post(self, request, *args, **kwargs):
+  def post(self, request, *args, **kwargs):
+
+        # start_timeをイギリス時間ではなく、日本の時間に合わせる
+        tz = timezone.get_current_timezone()
+        target_time = f'1899-12-30 {request.data["start_time"]}:00'
+        format_string = "%Y-%m-%d %H:%M:%S"
+        datetime_object = datetime.strptime(target_time, format_string)
+        tokyo_datetime = datetime_object+timedelta(hours=9)
+
         section_model = SectionModel()
         section_model.appearance_date = request.data["appearance_date"]
-        section_model.start_time = request.data["start_time"]
+        section_model.start_time = tokyo_datetime
         section_model.allotted_time = request.data["allotted_time"]
         section_model.artist_name = request.data["artist_name"]
         section_model.other1 = request.data["other1"]
@@ -434,8 +465,10 @@ class OperateDbSectionCreate(ListCreateAPIView):
         section_model.official_url = request.data["official_url"]
         section_model.twitter_id = request.data["twitter_id"]
         section_model.insta_id = request.data["insta_id"]
-        section_model.fes_id_id = request.data["stage_id"]
-        section_model.live_category_id = request.data["stage_id"]
+        section_model.apparence_flg = True
+
+        section_model.fes_id_id = request.data["fes_id"]
+        section_model.live_category_id = 1
         section_model.stage_id = request.data["stage_id"]
         section_model.save()
 
@@ -443,4 +476,5 @@ class OperateDbSectionCreate(ListCreateAPIView):
         return Response({
                 "error": "",
                 "success": "更新が完了しました。",
+                "data":f"{section_model.id}:{section_model.artist_name}",
             }, status=200)
