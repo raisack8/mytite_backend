@@ -478,3 +478,51 @@ class OperateDbSectionCreate(ListCreateAPIView):
                 "success": "更新が完了しました。",
                 "data":f"{section_model.id}:{section_model.artist_name}",
             }, status=200)
+  
+class DeleteFesModel(ListCreateAPIView):
+  def post(self, request, *args, **kwargs):
+      try:
+        target_id = request.data["id"]
+        record = FesModel.objects.get(id=target_id)
+        record.delete()
+        return Response({
+          "error": "",
+          "success": "削除しました",
+          }, status=200)  # 削除成功
+      except:
+          return Response({
+              "error": "システムエラーが発生しました",
+              "success": "",
+          }, status=200)
+
+class DeleteStageModel(ListCreateAPIView):
+  def post(self, request, *args, **kwargs):
+      try:
+        target_id = request.data["id"]
+        record = StageModel.objects.get(id=target_id)
+        record.delete()
+        return Response({
+          "error": "",
+          "success": "削除しました",
+          }, status=200)  # 削除成功
+      except:
+          return Response({
+              "error": "システムエラーが発生しました",
+              "success": "",
+          }, status=200)
+      
+class DeleteSectionModel(ListCreateAPIView):
+  def post(self, request, *args, **kwargs):
+      try:
+        target_id = request.data["id"]
+        record = SectionModel.objects.get(id=target_id)
+        record.delete()
+        return Response({
+          "error": "",
+          "success": "削除しました",
+          }, status=200)  # 削除成功
+      except:
+          return Response({
+              "error": "システムエラーが発生しました",
+              "success": "",
+          }, status=200)

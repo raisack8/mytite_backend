@@ -24,4 +24,7 @@ urlpatterns = [
     path('operate_db_fes_create/', apis.OperateDbFesCreate.as_view(), name='section_data_update'),
     path('operate_db_stage_create/', apis.OperateDbStageCreate.as_view(), name='section_data_update'),
     path('operate_db_section_create/', apis.OperateDbSectionCreate.as_view(), name='section_data_update'),
+    path('fes_delete/', apis.DeleteFesModel.as_view(), name='section_data_update'),
+    path('stage_delete/', apis.DeleteStageModel.as_view(), name='section_data_update'),
+    path('section_delete/', apis.DeleteSectionModel.as_view(), name='section_data_update'),
 ]
