@@ -1,0 +1,8 @@
+# litestream.toml
+
+[source]
+uri = "file:///backend/sqlite.db"
+
+[destination]
+gcs = "gs://my-tite-data/db.sqlite3"
+gcp_credentials_file = "./my-tite-project-29b7aca10489.json"

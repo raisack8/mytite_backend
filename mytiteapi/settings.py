@@ -84,27 +84,33 @@ WSGI_APPLICATION = 'mytiteapi.wsgi.application'
 import os
 
 if os.getenv('GAE_APPLICATION', None):
-  # GAE本番環境
+  # GAE本番環境c  c
   DATABASES = {
     'default': {
-      'ENGINE': 'django.db.backends.mysql',
-      'HOST': '/cloudsql/my-tite-project:us-central1:my-tite-db',
-      'USER': 'root',
-      'PASSWORD': 'Yama070301',
-      'NAME': 'my_tite_db',
+      # 'ENGINE': 'django.db.backends.mysql',
+      # 'HOST': '/cloudsql/my-tite-project:us-central1:my-tite-db',
+      # 'USER': 'root',
+      # 'PASSWORD': 'Yama070301',
+      # 'NAME': 'my_tite_db',
+      'ENGINE': 'django.db.backends.sqlite3',
+      'NAME': 'gs://my-tite-data/db.sqlite3',
+      'OPTIONS': {
+          'charset': 'utf8mb4',
+      },
     }
 
-    #     'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
   }
 else:
   # 開発環境
   DATABASES = {
     'default': {
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': 'gs://my-tite-data/db.sqlite3',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
   }
   # 事前に./cloud_sql_proxyを実行してプロキシ経由でアクセスできるようにする必要がある。
