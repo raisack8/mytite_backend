@@ -15,5 +15,5 @@ COPY requirements.txt /backend/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 COPY . .
-# CMD python manage.py runserver 0.0.0.0:8080
-CMD ["/bin/bash", "/app/run.sh"]
+CMD python manage.py runserver 0.0.0.0:8080
+# CMD ["/bin/bash", "/backend/run.sh"]

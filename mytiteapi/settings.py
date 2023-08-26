@@ -94,9 +94,6 @@ if os.getenv('GAE_APPLICATION', None):
       # 'NAME': 'my_tite_db',
       'ENGINE': 'django.db.backends.sqlite3',
       'NAME': 'gs://my-tite-data/db.sqlite3',
-      'OPTIONS': {
-          'charset': 'utf8mb4',
-      },
     }
 
   }
@@ -104,13 +101,10 @@ else:
   # 開発環境
   DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'gs://my-tite-data/db.sqlite3',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
+        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        # 'NAME': 'gs://my-tite-data/db.sqlite3',
     }
   }
   # 事前に./cloud_sql_proxyを実行してプロキシ経由でアクセスできるようにする必要がある。
