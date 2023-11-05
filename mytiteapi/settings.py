@@ -85,40 +85,38 @@ import os
 
 if os.getenv('GAE_APPLICATION', None):
   # GAE本番環境c  c
-  DATABASES = {
-    'default': {
-      # 'ENGINE': 'django.db.backends.mysql',
-      # 'HOST': '/cloudsql/my-tite-project:us-central1:my-tite-db',
-      # 'USER': 'root',
-      # 'PASSWORD': 'Yama070301',
-      # 'NAME': 'my_tite_db',
-      'ENGINE': 'django.db.backends.sqlite3',
-      'NAME': 'gs://my-tite-data/db.sqlite3',
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'dbname',
+            'USER': 'postgres',
+            'PASSWORD': 'password',
+            'HOST': 'db_mytite',  # Set to the address of your PostgreSQL
+            'PORT': '5432',  # Leave as an empty string to use the default port
+        }
     }
-
-  }
 else:
-  # 開発環境
-  DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': 'gs://my-tite-data/db.sqlite3',
-    }
-  }
-  # 事前に./cloud_sql_proxyを実行してプロキシ経由でアクセスできるようにする必要がある。
+    # 開発環境
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.sqlite3',
+    #         'NAME': BASE_DIR / 'db.sqlite3',
+    #         # 'ENGINE': 'django.db.backends.sqlite3',
+    #         # 'NAME': 'gs://my-tite-data/db.sqlite3',
+    #     }
+    # }
+    # # 事前に./cloud_sql_proxyを実行してプロキシ経由でアクセスできるようにする必要がある。
 
-  # DATABASES = {
-  #   'default': {
-  #   'ENGINE': 'django.db.backends.mysql',
-  #   'HOST': '127.0.0.1',
-  #   'PORT': '3306',
-  #   'USER': '[YOUR-USERNAME]',
-  #   'PASSWORD': '[YOUR-PASSWORD]',
-  #   'NAME': '[YOUR-DATABASE]',
-  #   }
-  # }
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'dbname',
+            'USER': 'postgres',
+            'PASSWORD': 'password',
+            'HOST': 'db_mytite',  # Set to the address of your PostgreSQL
+            'PORT': '5432',  # Leave as an empty string to use the default port
+        }
+    }
 
 
 # Password validation

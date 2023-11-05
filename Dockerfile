@@ -12,7 +12,11 @@ RUN tar -C /usr/local/bin -xzf /tmp/litestream.tar.gz
 RUN mkdir /backend
 WORKDIR /backend
 COPY requirements.txt /backend/requirements.txt
+
+RUN apk --no-cache add build-base
+RUN apk --no-cache add postgresql-dev
 RUN pip install --upgrade pip
+RUN python3 -m pip install psycopg2
 RUN pip install -r requirements.txt
 COPY . .
 CMD python manage.py runserver 0.0.0.0:8080
